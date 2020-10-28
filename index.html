@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>WebSocket EchoServer</title>
+</head>
+<body>
+
+<label for="userName">Seu Nome: </label>
+<input id="userName" type="text">
+
+<br>
+
+<button onclick="conectar();">Conectar</button>
+
+<br>
+
+<label for="input">Digite aqui: </label>
+<input id="input" type="text"/>
+
+<div id="response"></div>
+<script>
+
+let userName 	= document.getElementById('userName');
+let input 		= document.getElementById('input');
+let response 	= document.getElementById('response');
+let conn 		= new WebSocket('ws://localhost:8080');
+conn.onopen = function(e) { 
+	response.insertAdjacentHTML('beforeend', "<p><b>Servidor diz: </b>Connection established!</p>");
+};
+conn.onmessage = function(e) { 
+	let msm = JSON.parse(e.data);
+	response.insertAdjacentHTML('beforeend', "<p><b>" + msm.user + " diz: </b>" + msm.msm + "</p>");
+};
+
+function conectar() { 
+	if (userName.value == '') { 
+		alert('Informe o nome!');
+		userName.focus();
+		return;
+	}
+	userName.disabled = true;
+
+	conn.send(JSON.stringify({
+		op: 'register',
+		userName: userName.value
+	}));
+}
+
+input.addEventListener('keyup', function (event) {
+	if (event.keyCode === 13) {
+		conn.send(JSON.stringify({
+			op: 'sendMsm',
+			msm: this.value
+		}));
+		this.value = '';
+	}
+});
+</script>
+</body>
+</html>
